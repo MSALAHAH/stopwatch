@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
     <title>Stopwatch</title>
 </head>
 
@@ -19,7 +18,6 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            transition: background-color 1s ease;
         }
 
         .stopwatch-container {
@@ -28,7 +26,7 @@
 
         #display {
             font-size: 10em;
-            text-shadow: 1px 1px 20px white;
+            text-shadow: 1px 1px 10px rgb(0, 0, 0);
             margin-bottom: 10px;
         }
 
@@ -54,7 +52,7 @@
         }
     </style>
     <div class="stopwatch-container">
-        <div id="display">00:00:00</div>
+        <div id="display">00:00:00<span style="font-size: 5rem;">.00</span></div>
         <button id="startStop" onclick="startStop()">Start</button>
         <button id="reset" onclick="reset()">Reset</button>
     </div>
@@ -64,16 +62,14 @@
     <script>
         let timer;
         let isRunning = false;
+        let milliseconds = 0;
 
         function startStop() {
             if (isRunning) {
                 clearInterval(timer);
                 document.getElementById('startStop').innerText = 'Start';
             } else {
-                timer = setInterval(() => {
-                    updateDisplay();
-                    changeBackgroundColor();
-                }, 1000);
+                timer = setInterval(updateDisplay, 10); // Update every 10 milliseconds
                 document.getElementById('startStop').innerText = 'Stop';
 
                 // Prevent screen from turning off
@@ -89,40 +85,26 @@
         }
 
         function updateDisplay() {
-            const display = document.getElementById('display');
-            let time = display.innerText.split(':');
-            let seconds = parseInt(time[2], 10);
-            let minutes = parseInt(time[1], 10);
-            let hours = parseInt(time[0], 10);
+            milliseconds += 10;
 
-            seconds++;
+            let hours = Math.floor(milliseconds / 3600000);
+            let minutes = Math.floor((milliseconds % 3600000) / 60000);
+            let seconds = Math.floor((milliseconds % 60000) / 1000);
+            let ms = Math.floor((milliseconds % 1000) / 10); // Display as two digits
 
-            if (seconds === 60) {
-                seconds = 0;
-                minutes++;
-                if (minutes === 60) {
-                    minutes = 0;
-                    hours++;
-                }
-            }
-
-            display.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            document.getElementById('display').innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(ms)}`;
         }
 
         function reset() {
             clearInterval(timer);
             isRunning = false;
+            milliseconds = 0;
             document.getElementById('startStop').innerText = 'Start';
-            document.getElementById('display').innerText = '00:00:00';
+            document.getElementById('display').innerText = '00:00:00.00';
         }
 
         function pad(value) {
             return value < 10 ? `0${value}` : value;
-        }
-
-        function changeBackgroundColor() {
-            const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
-            document.body.style.backgroundColor = randomColor;
         }
     </script>
 </body>
