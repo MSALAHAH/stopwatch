@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Stopwatch</title>
+</head>
+
+<body>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kdam+Thmor+Pro&display=swap');
+
+        body {
+            font-family: 'Kdam Thmor Pro', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color 1s ease;
+        }
+
+        .stopwatch-container {
+            text-align: center;
+        }
+
+        #display {
+            font-size: 10em;
+            margin-bottom: 10px;
+        }
+
+        button {
+            font-family: inherit;
+            font-size: 2rem;
+            padding: 7px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: rgb(255 255 255) 1px 1px 4px 0px;
+        }
+    </style>
+    <div class="stopwatch-container">
+        <div id="display">00:00:00</div>
+        <button id="startStop" onclick="startStop()">Start</button>
+        <button id="reset" onclick="reset()">Reset</button>
+    </div>
+    <script>
+        let timer;
+        let isRunning = false;
+
+        function startStop() {
+            if (isRunning) {
+                clearInterval(timer);
+                document.getElementById('startStop').innerText = 'Start';
+            } else {
+                timer = setInterval(() => {
+                    updateDisplay();
+                    changeBackgroundColor();
+                }, 1000);
+                document.getElementById('startStop').innerText = 'Stop';
+
+                // Prevent screen from turning off
+                if ('wakeLock' in navigator) {
+                    navigator.wakeLock.request('screen').then((wakeLock) => {
+                        wakeLock.addEventListener('release', () => {
+                            console.log('Screen Wake Lock released:', wakeLock.released);
+                        });
+                    });
+                }
+            }
+            isRunning = !isRunning;
+        }
+
+        function updateDisplay() {
+            const display = document.getElementById('display');
+            let time = display.innerText.split(':');
+            let seconds = parseInt(time[2], 10);
+            let minutes = parseInt(time[1], 10);
+            let hours = parseInt(time[0], 10);
+
+            seconds++;
+
+            if (seconds === 60) {
+                seconds = 0;
+                minutes++;
+                if (minutes === 60) {
+                    minutes = 0;
+                    hours++;
+                }
+            }
+
+            display.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        function reset() {
+            clearInterval(timer);
+            isRunning = false;
+            document.getElementById('startStop').innerText = 'Start';
+            document.getElementById('display').innerText = '00:00:00';
+        }
+
+        function pad(value) {
+            return value < 10 ? `0${value}` : value;
+        }
+
+        function changeBackgroundColor() {
+            const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            document.body.style.backgroundColor = randomColor;
+        }
+    </script>
+</body>
+
+</html>
